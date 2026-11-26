@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets (keep .env.example!)
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Backup files
+*.bak
+*.bak-*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
