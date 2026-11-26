@@ -8,14 +8,29 @@ import { refinePathummaFields } from './qualityFieldGuard.mjs';
 
 // Development-only, separate entrypoint. Does not change serverHybrid.mjs.
 const app=express();
-const allowedOrigins=new Set([
-  'http://localhost:5173','http://127.0.0.1:5173',
-  'http://localhost:5174','http://127.0.0.1:5174'
-]);
-app.use(cors({ origin(origin,cb) {
-  if(!origin || allowedOrigins.has(origin)) return cb(null,true);
-  cb(new Error('Origin not allowed'));
-}}));
+// CORS: read allowed frontend origins from FRONTEND_ORIGINS in .env
+// (comma-separated, see .env.example). Falls back to local Vite ports
+// when the variable is not set. Same logic as serverHybridGroundedArtV1.mjs.
+const allowedOrigins = new Set(
+  (process.env.FRONTEND_ORIGINS || [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5174'
+  ].join(','))
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean)
+);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Origin not allowed'));
+  }
+}));
 app.use(express.json({limit:'10kb'}));
 
 app.get('/api/health',(_req,res)=>res.json({
